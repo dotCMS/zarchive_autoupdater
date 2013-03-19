@@ -15,8 +15,8 @@ import org.osgi.framework.ServiceReference;
  */
 public class Activator extends GenericBundleActivator {
 
-    public static final String MAPPING_UPGRADE = "/servlets/upgrade/*";
-    public static final String MAPPING_UPGRADE_2X = "/servlets/upgrade2x/*";
+    public static final String MAPPING_UPGRADE = "/servlets/upgrade";
+    public static final String MAPPING_UPGRADE_2X = "/servlets/upgrade2x";
     public static final String MAPPING_UPGRADE_UPLOAD = "/servlets/upgradeUpload";
 
     @Override

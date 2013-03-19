@@ -12,4 +12,9 @@ Export-Package: org.apache.commons.fileupload,
  com.liferay.portal.util,
  org.apache.commons.io,
  com.dotmarketing.factories,
- com.liferay.util
+ com.liferay.util,
+ org.xbill.DNS,
+ com.dotmarketing.beans,
+ com.dotmarketing.portlets.files.model,
+ org.apache.lucene.queryParser,
+ com.dotmarketing.portlets.contentlet.model
