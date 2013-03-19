@@ -1,0 +1,15 @@
+Bundle-ManifestVersion: 2
+Bundle-Name: AutoUpdater extra packages
+Bundle-SymbolicName: auto-updater-Fragment
+Bundle-Version: 1.0
+Bundle-Description: Bundle exporting 3rdparty libs
+Fragment-Host: system.bundle; extension:=framework
+Export-Package: org.apache.commons.fileupload,
+ org.apache.commons.fileupload.disk,
+ org.apache.commons.fileupload.servlet,
+ com.liferay.util.servlet,
+ org.apache.commons.lang.exception,
+ com.liferay.portal.util,
+ org.apache.commons.io,
+ com.dotmarketing.factories,
+ com.liferay.util
