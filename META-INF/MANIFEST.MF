@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-Name: dotCMS AutoUpdater
+Bundle-SymbolicName: auto_updater
+Bundle-Description: dotCMS Auto Updater
+Bundle-Version: 0.1
+Bundle-Activator: org.dotcms.autoupdater.Activator
+DynamicImport-Package: *
+Import-Package:  org.osgi.service.http,
+ org.apache.felix.http.api
