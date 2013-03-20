@@ -314,7 +314,7 @@ public class UpdateServletLogic {
 
                     if ( !UtilMethods.compareVersions( currentMajorVersion.getStringProperty( config.getVersionMajorField() ), contentletMajorVersion.getStringProperty( config.getVersionMajorField() ) ) ) {
 
-                        query = " +Parent_Versions-Child_Files:" + contentletMajorVersion.getIdentifier() + ( allowTestingBuilds? "" : " +AutoupdaterFiles.released:true" ) + " +deleted:false +live:true";
+                        query = " +Parent_Versions-Child_Files:" + contentletMajorVersion.getIdentifier() + ( allowTestingBuilds? "" : " +" + config.getFilesStructure() + ".released:true" ) + " +deleted:false +live:true";
                         majorList = cAPI.search( query, 1, 0, config.getFilesStructure() + "." + config.getReleaseDateField() + " desc", sysUser, false );
                         if ( !majorList.isEmpty() ) {
                             Logger.debug( this.getClass(), "Found Major version = " + contentletMajorVersion.getStringProperty( "major" ) + " greater than = " + currentMajorVersion.getStringProperty( "major" ) );
@@ -438,7 +438,7 @@ public class UpdateServletLogic {
         }
 
         //Verify if there is a file to provide
-        String contFile = buildContentlet.getStringProperty( "file" );
+        String contFile = buildContentlet.getStringProperty( config.getFilesFileFieldName() );
         if ( !UtilMethods.isSet( contFile ) ) {
             Logger.info( this.getClass(), "File property on minor " + buildContentlet.getStringProperty( "minor" ) + " Build " + buildContentlet.getStringProperty( "buildNumber" ) + " not set" );
             retCode = 204;
