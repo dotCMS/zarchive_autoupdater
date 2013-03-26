@@ -8,6 +8,7 @@ import org.dotcms.autoupdater.servlet.UpdateServlet2x;
 import org.dotcms.autoupdater.servlet.UpdateUploadServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.tuckey.web.filters.urlrewrite.NormalRule;
 
 /**
  * Created by Jonathan Gamba
@@ -45,6 +46,32 @@ public class Activator extends GenericBundleActivator {
         CMSFilter.addExclude( "/app" + MAPPING_UPGRADE );
         CMSFilter.addExclude( "/app" + MAPPING_UPGRADE_2X );
         CMSFilter.addExclude( "/app" + MAPPING_UPGRADE_UPLOAD );
+
+        //Add some url Rewrite rules
+        addRule( "oldAutoUpdaterRule2X", "^" + MAPPING_UPGRADE_2X + "$", "/app" + MAPPING_UPGRADE_2X );
+        addRule( "oldAutoUpdaterRule", "^" + MAPPING_UPGRADE + "$", "/app" + MAPPING_UPGRADE );
+        addRule( "oldAutoUpdaterRuleUpload", "^" + MAPPING_UPGRADE_UPLOAD + "$", "/app" + MAPPING_UPGRADE_UPLOAD );
+    }
+
+    /**
+     * Creates and add tuckey rules
+     *
+     * @param name
+     * @param from
+     * @param to
+     * @throws Exception
+     */
+    private void addRule ( String name, String from, String to ) throws Exception {
+
+        //Create the tuckey rule
+        NormalRule rule = new NormalRule();
+        rule.setFrom( from );
+        rule.setToType( "redirect" );
+        rule.setTo( to );
+        rule.setName( name );
+
+        //And add the rewrite rule
+        addRewriteRule( rule );
     }
 
     @Override

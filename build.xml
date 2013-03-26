@@ -8,7 +8,7 @@
     <property name="jar.file" value="${build.dir}/jar/${jar.name}"/>
 
     <!--TODO: This is relative to the location of the plugin (Right now is assuming is directly under the dotcms root folder)-->
-    <property name="app.base" value="${basedir}/../"/>
+    <property name="app.base" value="${basedir}/../dotCMS"/>
     <!--TODO: This is relative to the location of the plugin (Right now is assuming is directly under the dotcms root folder)-->
 
     <property name="lib.app" value="${app.base}/dotCMS/WEB-INF/lib"/>
