@@ -66,7 +66,7 @@ public class Activator extends GenericBundleActivator {
         //Create the tuckey rule
         NormalRule rule = new NormalRule();
         rule.setFrom( from );
-        rule.setToType( "redirect" );
+        rule.setToType( "forward" );
         rule.setTo( to );
         rule.setName( name );
 

@@ -17,4 +17,5 @@ Export-Package: org.apache.commons.fileupload,
  com.dotmarketing.beans,
  com.dotmarketing.portlets.files.model,
  org.apache.lucene.queryParser,
- com.dotmarketing.portlets.contentlet.model
+ com.dotmarketing.portlets.contentlet.model,
+ org.tuckey.web.filters.urlrewrite
