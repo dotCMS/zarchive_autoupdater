@@ -4,7 +4,7 @@
 
     <property name="build.dir" value="build"/>
     <property name="src.dir" value="src"/>
-    <property name="jar.name" value="fragment-support_portal.jar"/>
+    <property name="jar.name" value="fragment-AUTO_UPDATER.jar"/>
     <property name="jar.file" value="${build.dir}/jar/${jar.name}"/>
 
     <property name="app.base" value="${basedir}/../../../../"/>
