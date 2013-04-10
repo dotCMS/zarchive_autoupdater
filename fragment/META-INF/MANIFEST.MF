@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: AutoUpdater extra packages
-Bundle-SymbolicName: AUTO-UPDATER-Fragment
+Bundle-SymbolicName: auto-updater-FRAGMENT
 Bundle-Version: 1.0
 Bundle-Description: Bundle exporting 3rdparty libs
 Fragment-Host: system.bundle; extension:=framework
