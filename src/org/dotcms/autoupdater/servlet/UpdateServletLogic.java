@@ -1,33 +1,5 @@
 package org.dotcms.autoupdater.servlet;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.lucene.queryParser.ParseException;
-import org.dotcms.autoupdater.servlet.UpdateUploadServlet.UpdateData;
-import org.xbill.DNS.DClass;
-import org.xbill.DNS.ExtendedResolver;
-import org.xbill.DNS.Message;
-import org.xbill.DNS.Name;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.Resolver;
-import org.xbill.DNS.ReverseMap;
-import org.xbill.DNS.Section;
-import org.xbill.DNS.Type;
-
 import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.DotStateException;
@@ -49,6 +21,20 @@ import com.dotmarketing.util.Config;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.liferay.portal.model.User;
+import org.apache.lucene.queryParser.ParseException;
+import org.dotcms.autoupdater.servlet.UpdateUploadServlet.UpdateData;
+import org.xbill.DNS.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 public class UpdateServletLogic {
 
@@ -217,11 +203,11 @@ public class UpdateServletLogic {
             }
         } catch ( DotDataException e ) {
             Logger.error( this.getClass(), "DotDataException: " + e.getMessage(), e );
-        } catch (DotStateException e) {
-			Logger.error(UpdateServletLogic.class,e.getMessage(),e);
-		} catch (DotSecurityException e) {
-			Logger.error(UpdateServletLogic.class,e.getMessage(),e);
-		}
+        } catch ( DotStateException e ) {
+            Logger.error( UpdateServletLogic.class, e.getMessage(), e );
+        } catch ( DotSecurityException e ) {
+            Logger.error( UpdateServletLogic.class, e.getMessage(), e );
+        }
 
         return buildFile;
     }
@@ -246,11 +232,11 @@ public class UpdateServletLogic {
             }
         } catch ( DotDataException e ) {
             Logger.error( this.getClass(), "DotDataException: " + e.getMessage(), e );
-        } catch (DotStateException e) {
-			Logger.error(UpdateServletLogic.class,e.getMessage(),e);
-		} catch (DotSecurityException e) {
-			Logger.error(UpdateServletLogic.class,e.getMessage(),e);
-		}
+        } catch ( DotStateException e ) {
+            Logger.error( UpdateServletLogic.class, e.getMessage(), e );
+        } catch ( DotSecurityException e ) {
+            Logger.error( UpdateServletLogic.class, e.getMessage(), e );
+        }
 
         return buildFile;
     }
@@ -272,7 +258,7 @@ public class UpdateServletLogic {
         ContentletAPI cAPI = APILocator.getContentletAPI();
         User sysUser = APILocator.getUserAPI().getSystemUser();
 
-        //Get major for this version
+        //First get the build for this given minor version
         String query = "+structureName:" + config.getFilesStructure() + " +"
                 + config.getFilesStructure() + "." + config.getFilesMinorFieldName() + ":*" + version + "*"
                 + " +deleted:false +live:true";
@@ -281,10 +267,10 @@ public class UpdateServletLogic {
         Contentlet currentMajorVersion = null;
         if ( !versionList.isEmpty() ) {//If we found something...
 
-            Contentlet currentVersion = versionList.get( 0 );
-            if ( UtilMethods.isSet( currentVersion.getIdentifier() ) ) {
-                //Search the contentlet for this major version
-                query = "+" + config.getVersionRelationship() + ":" + currentVersion.getIdentifier() + " +deleted:false +live:true";
+            Contentlet currentBuild= versionList.get( 0 );
+            if ( UtilMethods.isSet( currentBuild.getIdentifier() ) ) {
+                //Search for the mayor version of the build we just found
+                query = "+" + config.getVersionRelationship() + ":" + currentBuild.getIdentifier() + " +deleted:false +live:true";
                 versionList = cAPI.search( query, 1, 0, "", sysUser, false );
                 if ( !versionList.isEmpty() ) {
                     currentMajorVersion = versionList.get( 0 );
@@ -292,7 +278,7 @@ public class UpdateServletLogic {
             }
         }
 
-        //OK.., if we found the major version of the given version we must try to find now the major version greater than this major version
+        //OK.., if we found the major version of the given build we must try to find now the major version greater than this major version
         if ( currentMajorVersion != null && UtilMethods.isSet( currentMajorVersion.getIdentifier() ) ) {
 
             Logger.info( this.getClass(), "Found Major version = " + currentMajorVersion.getStringProperty( "major" ) );
@@ -304,7 +290,7 @@ public class UpdateServletLogic {
             if ( !config.is2XBuild() ) {
                 query += " -" + config.getVersionStructure() + "." + config.getVersionMajorField() + ":2.*";
             }
-
+            //Now lets search for all the mayor versions except the current one, and lets compare one by one which one is mayor
             versionList = cAPI.search( query, 0, 0, config.getVersionStructure() + "." + config.getVersionMajorField() + " desc", sysUser, false );
 
             if ( !versionList.isEmpty() ) {
@@ -313,13 +299,35 @@ public class UpdateServletLogic {
                 for ( Contentlet contentletMajorVersion : versionList ) {
 
                     if ( !UtilMethods.compareVersions( currentMajorVersion.getStringProperty( config.getVersionMajorField() ), contentletMajorVersion.getStringProperty( config.getVersionMajorField() ) ) ) {
-
-                        query = " +Parent_Versions-Child_Files:" + contentletMajorVersion.getIdentifier() + ( allowTestingBuilds? "" : " +" + config.getFilesStructure() + ".released:true" ) + " +deleted:false +live:true";
+                        //Verify that there is content on this mayor version
+                        query = " +Parent_Versions-Child_Files:" + contentletMajorVersion.getIdentifier() + (allowTestingBuilds ? "" : " +" + config.getFilesStructure() + ".released:true") + " +deleted:false +live:true";
                         majorList = cAPI.search( query, 1, 0, config.getFilesStructure() + "." + config.getReleaseDateField() + " desc", sysUser, false );
                         if ( !majorList.isEmpty() ) {
-                            Logger.debug( this.getClass(), "Found Major version = " + contentletMajorVersion.getStringProperty( "major" ) + " greater than = " + currentMajorVersion.getStringProperty( "major" ) );
-                            currentMajorVersion = contentletMajorVersion;
-                            break;
+
+                            /*
+                            At this point it is important to verify not only that we have builds related to this major version, but also that
+                            the builds are of the type we require, meaning, if we are looking for an autoupdater update lets make sure at least
+                            one autoupdater build is present.
+                             */
+                            Boolean requiredBuilds = false;
+                            for ( Contentlet build : majorList ) {
+                                String minor = build.getStringProperty( "minor" );
+                                if (version.startsWith( AUTO_UPDATER_PREFIX )) {//Meaning we are looking for updates for the autoupdater
+                                    if ( minor.startsWith( AUTO_UPDATER_PREFIX ) ) {
+                                        requiredBuilds = true;
+                                    }
+                                } else {//Meaning we are looking for regular updates
+                                    if ( !minor.startsWith( AUTO_UPDATER_PREFIX ) ) {
+                                        requiredBuilds = true;
+                                    }
+                                }
+                            }
+
+                            if ( requiredBuilds ) {
+                                Logger.debug( this.getClass(), "Found Major version = " + contentletMajorVersion.getStringProperty( "major" ) + " greater than = " + currentMajorVersion.getStringProperty( "major" ) );
+                                currentMajorVersion = contentletMajorVersion;
+                                break;
+                            }
                         }
                     }
                 }
@@ -397,7 +405,7 @@ public class UpdateServletLogic {
                 //If same version compare build number
                 long fileBuild = Long.parseLong( buildContentlet.getStringProperty( "buildNumber" ) );
                 long currentBuild = Long.parseLong( build );
-                if ( !( fileBuild > currentBuild ) ) {
+                if ( !(fileBuild > currentBuild) ) {
 
                     Logger.info( this.getClass(), "Current version " + currentVersion + " Build " + build + " got version " + minorVersion + " Build " + buildContentlet.getStringProperty( "buildNumber" ) + " , No newer version available" );
 
@@ -445,7 +453,7 @@ public class UpdateServletLogic {
             return null;
         }
 
-        Identifier fileIdentifier = APILocator.getIdentifierAPI().find(contFile);
+        Identifier fileIdentifier = APILocator.getIdentifierAPI().find( contFile );
         String minorVersion = buildContentlet.getStringProperty( "minor" );
 
         if ( currentVersion.startsWith( AUTO_UPDATER_PREFIX ) ) {
@@ -464,7 +472,7 @@ public class UpdateServletLogic {
                 //If same version compare build number
                 long fileBuild = Long.parseLong( buildContentlet.getStringProperty( "buildNumber" ) );
                 long currentBuild = Long.parseLong( build );
-                if ( !( fileBuild > currentBuild ) ) {
+                if ( !(fileBuild > currentBuild) ) {
 
                     Logger.info( this.getClass(), "Current version " + currentVersion + " Build " + build + " got version " + minorVersion + " Build " + buildContentlet.getStringProperty( "buildNumber" ) + " , No newer version available" );
 
@@ -540,7 +548,7 @@ public class UpdateServletLogic {
             contents.add( major );
             relations.put( rel, contents );
 
-            Folder folder = APILocator.getFolderAPI().findFolderByPath(config.getUpgradeFileHome() + data.getMajor() + "/", APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ).getIdentifier(), user, true);
+            Folder folder = APILocator.getFolderAPI().findFolderByPath( config.getUpgradeFileHome() + data.getMajor() + "/", APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ).getIdentifier(), user, true );
 
             if ( folder != null && UtilMethods.isSet( folder.getInode() ) ) {
 
@@ -558,9 +566,9 @@ public class UpdateServletLogic {
                 // find if file exists.
 
                 Logger.info( this.getClass(), "Checking if file already exists" );
-                com.dotmarketing.portlets.files.model.File oldFile = APILocator.getFileAPI().getFileByURI(config.getUpgradeFileHome() + data.getMajor() + "/" + name, APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ), false, user, true);
+                com.dotmarketing.portlets.files.model.File oldFile = APILocator.getFileAPI().getFileByURI( config.getUpgradeFileHome() + data.getMajor() + "/" + name, APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ), false, user, true );
                 if ( oldFile == null || !UtilMethods.isSet( oldFile.getInode() ) ) {
-                	oldFile = APILocator.getFileAPI().getFileByURI(config.getUpgradeFileHome() + data.getMajor() + "/" + name, APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ), false, user, true);
+                    oldFile = APILocator.getFileAPI().getFileByURI( config.getUpgradeFileHome() + data.getMajor() + "/" + name, APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ), false, user, true );
                 }
 
                 if ( oldFile != null && UtilMethods.isSet( oldFile.getIdentifier() ) && !isNewContent ) {
@@ -579,12 +587,12 @@ public class UpdateServletLogic {
                         c.setStringProperty( config.getFilesMD5FieldName(), output );
                         c.setStringProperty( config.getFilesFileFieldName(), oldFile.getIdentifier() );
                     } else {
-                        file.setSize( ( ( Long ) data.getFile().length() ).intValue() );
+                        file.setSize( ((Long) data.getFile().length()).intValue() );
                         file.setMimeType( "application/zip" );
                         file.setFileName( name );
                         file.setModUser( user.getUserId() );
                         Logger.info( this.getClass(), "Saving file inode " + file.getFileName() );
-                        HibernateUtil.saveOrUpdate(file);
+                        HibernateUtil.saveOrUpdate( file );
                         // get the file Identifier
                         Identifier ident = null;
                         ident = new Identifier();
@@ -597,7 +605,7 @@ public class UpdateServletLogic {
                         c.setStringProperty( config.getFilesMD5FieldName(), output );
 
                         Logger.info( this.getClass(), "Saving working file " + file.getFileName() );
-                        workingFile = APILocator.getFileAPI().saveFile(file, data.getFile(), folder, user, true);
+                        workingFile = APILocator.getFileAPI().saveFile( file, data.getFile(), folder, user, true );
 
                         Logger.info( this.getClass(), "Publishing file " + file.getFileName() );
                         PublishFactory.publishAsset( workingFile, user, false );
@@ -611,7 +619,7 @@ public class UpdateServletLogic {
                     } else {
                         c = cAPI.checkin( c, user, false );
                     }
-                    cAPI.publish(c, user, true);
+                    cAPI.publish( c, user, true );
                     Logger.info( this.getClass(), "File and content checked in." );
                     return true;
                 }
@@ -629,7 +637,7 @@ public class UpdateServletLogic {
         if ( user == null ) {
             return false;
         }
-        Folder folder = APILocator.getFolderAPI().findFolderByPath(config.getUpgradeFileHome(), APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ).getIdentifier(), user, true);
+        Folder folder = APILocator.getFolderAPI().findFolderByPath( config.getUpgradeFileHome(), APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ).getIdentifier(), user, true );
         return APILocator.getPermissionAPI().doesUserHavePermission( folder, PermissionAPI.PERMISSION_WRITE, user );
     }
 
@@ -640,7 +648,7 @@ public class UpdateServletLogic {
             InputStream is = new FileInputStream( f );
             byte[] buffer = new byte[8192];
             int read;
-            while ( ( read = is.read( buffer ) ) > 0 ) {
+            while ( (read = is.read( buffer )) > 0 ) {
                 digest.update( buffer, 0, read );
             }
 
