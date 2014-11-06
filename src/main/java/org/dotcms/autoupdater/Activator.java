@@ -2,13 +2,13 @@ package org.dotcms.autoupdater;
 
 import com.dotmarketing.filters.CMSFilter;
 import com.dotmarketing.osgi.GenericBundleActivator;
-import org.apache.felix.http.api.ExtHttpService;
+import com.dotcms.repackage.org.apache.felix.http.api.ExtHttpService;
 import org.dotcms.autoupdater.servlet.UpdateServlet;
 import org.dotcms.autoupdater.servlet.UpdateServlet2x;
 import org.dotcms.autoupdater.servlet.UpdateUploadServlet;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.tuckey.web.filters.urlrewrite.NormalRule;
+import com.dotcms.repackage.org.osgi.framework.BundleContext;
+import com.dotcms.repackage.org.osgi.framework.ServiceReference;
+import com.dotcms.repackage.org.tuckey.web.filters.urlrewrite.NormalRule;
 
 /**
  * Created by Jonathan Gamba

@@ -21,9 +21,9 @@ import com.dotmarketing.util.Config;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.liferay.portal.model.User;
-import org.apache.lucene.queryParser.ParseException;
+import com.dotcms.repackage.org.apache.lucene.queryparser.classic.ParseException;
 import org.dotcms.autoupdater.servlet.UpdateUploadServlet.UpdateData;
-import org.xbill.DNS.*;
+import com.dotcms.repackage.org.xbill.DNS.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -249,7 +249,7 @@ public class UpdateServletLogic {
      * @return
      * @throws com.dotmarketing.exception.DotDataException
      * @throws com.dotmarketing.exception.DotSecurityException
-     * @throws org.apache.lucene.queryParser.ParseException
+     * @throws com.dotcms.repackage.org.apache.lucene.queryparser.classic.ParseException
      */
     private Contentlet getMajorVersion ( String version, boolean allowTestingBuilds ) throws DotDataException, DotSecurityException, ParseException {
 

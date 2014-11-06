@@ -1,0 +1,40 @@
+apply plugin: 'application'
+apply plugin: 'osgi'
+apply plugin: 'war'
+apply plugin: 'eclipse'
+
+sourceCompatibility = '1.7'
+version = '0.1'
+
+
+repositories {
+	maven {
+        url "http://repo.dotcms.com/artifactory/libs-release"
+    }
+}
+
+dependencies {
+	compile fileTree(dir: 'src/main/resources/libs', include: '*.jar')
+	compile (group: 'com.dotcms', name: 'dotcms', version: '3.0PR1'){
+		transitive = true
+	}
+	providedCompile "javax.servlet:servlet-api:2.5"
+}
+
+jar {
+    manifest {
+        name = 'dotCMS AutoUpdater'
+        instruction 'Bundle-Vendor', 'dotCMS'
+        instruction 'Bundle-Description', 'dotCMS Auto Updater'
+        instruction 'Bundle-DocURL', 'http://www.dotcms.com'
+        instruction 'Bundle-Activator', 'org.dotcms.autoupdater.Activator'
+        instruction 'DynamicImport-Package', '*'
+        instruction 'Import-Package', 'com.dotcms.repackage.org.osgi.service.http',
+                'com.dotcms.repackage.org.apache.felix.http.api'
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.8'
+}
+

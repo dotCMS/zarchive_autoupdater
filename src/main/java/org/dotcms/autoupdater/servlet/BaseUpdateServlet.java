@@ -1,5 +1,6 @@
 package org.dotcms.autoupdater.servlet;
 
+import com.dotcms.repackage.com.oreilly.servlet.Base64Decoder;
 import com.dotmarketing.cms.factories.PublicCompanyFactory;
 import com.dotmarketing.cms.factories.PublicEncryptionFactory;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
@@ -7,7 +8,6 @@ import com.dotmarketing.util.Logger;
 import com.liferay.portal.ejb.UserLocalManagerUtil;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.User;
-import com.oreilly.servlet.Base64Decoder;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;

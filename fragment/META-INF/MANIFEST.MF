@@ -4,18 +4,18 @@ Bundle-SymbolicName: auto-updater-FRAGMENT
 Bundle-Version: 1.0
 Bundle-Description: Bundle exporting 3rdparty libs
 Fragment-Host: system.bundle; extension:=framework
-Export-Package: org.apache.commons.fileupload,
- org.apache.commons.fileupload.disk,
- org.apache.commons.fileupload.servlet,
+Export-Package: com.dotcms.repackage.org.apache.commons.fileupload,
+ com.dotcms.repackage.org.apache.commons.fileupload.disk,
+ com.dotcms.repackage.org.apache.commons.fileupload.servlet,
  com.liferay.util.servlet,
- org.apache.commons.lang.exception,
+ com.dotcms.repackage.org.apache.commons.lang.exception,
  com.liferay.portal.util,
- org.apache.commons.io,
+ com.dotcms.repackage.org.apache.commons.io,
  com.dotmarketing.factories,
  com.liferay.util,
- org.xbill.DNS,
+ com.dotcms.repackage.org.xbill.DNS,
  com.dotmarketing.beans,
  com.dotmarketing.portlets.files.model,
- org.apache.lucene.queryParser,
+ com.dotcms.repackage.org.apache.lucene.queryparser,
  com.dotmarketing.portlets.contentlet.model,
- org.tuckey.web.filters.urlrewrite
+ com.dotcms.repackage.org.tuckey.web.filters.urlrewrite
