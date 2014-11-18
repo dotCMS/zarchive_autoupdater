@@ -290,6 +290,9 @@ public class UpdateServletLogic {
             if ( !config.is2XBuild() ) {
                 query += " -" + config.getVersionStructure() + "." + config.getVersionMajorField() + ":2.*";
             }
+            if ( !config.is3XBuild() ) {
+                query += " -" + config.getVersionStructure() + "." + config.getVersionMajorField() + ":3.*";
+            }
             //Now lets search for all the mayor versions except the current one, and lets compare one by one which one is mayor
             versionList = cAPI.search( query, 0, 0, config.getVersionStructure() + "." + config.getVersionMajorField() + " desc", sysUser, false );
 
