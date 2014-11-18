@@ -29,7 +29,7 @@ public class UpdateServlet2x extends BaseUpdateServlet {
      */
     protected void service ( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException {
 
-        config = new UpdateServletLogicConfig( true );
+        config = new UpdateServletLogicConfig( true, false );
 
         //Getting all the parameters for the autoupdater
         String version = request.getParameter( config.getReqVersion() );

@@ -29,9 +29,11 @@ public class UpdateServletLogicConfig {
     private String reqCheckValue = "check_version";
 
     private Boolean is2XBuild;
+    private Boolean is3XBuild;
 
-    public UpdateServletLogicConfig ( Boolean is2XBuild ) {
+    public UpdateServletLogicConfig ( Boolean is2XBuild, Boolean is3XBuild ) {
         this.is2XBuild = is2XBuild;
+        this.is3XBuild = is3XBuild;
     }
 
     public String getBuildNumberField () {
@@ -122,8 +124,16 @@ public class UpdateServletLogicConfig {
         return is2XBuild;
     }
 
+    public Boolean is3XBuild () {
+        return is3XBuild;
+    }
+
     public void setIs2XBuild ( Boolean is2XBuild ) {
         this.is2XBuild = is2XBuild;
+    }
+
+    public void setIs3XBuild ( Boolean is3XBuild ) {
+        this.is3XBuild = is3XBuild;
     }
 
 }
