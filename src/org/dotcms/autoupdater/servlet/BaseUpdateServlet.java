@@ -111,7 +111,7 @@ public abstract class BaseUpdateServlet extends HttpServlet {
 
         boolean success = false;
         if ( buildFile == null ) {
-            Logger.info( UpdateServlet.class, "Could not find autoupdater file for version = " + version + " and build " + build );
+            Logger.info( this, "Could not find autoupdater file for version = " + version + " and build " + build );
             response.sendError( logic.getRetCode() );
         } else {
             serveHeaders( response, null, md5, newMinor, prettyName );
