@@ -182,7 +182,7 @@ public abstract class BaseUpdateServlet extends HttpServlet {
         if ( downloadLink != null ) {
             response.setHeader( "Download-Link", downloadLink );
         }
-        if ( md5 != null ) {
+        if ( md5 != null && !md5.isEmpty() ) {
             response.setHeader( "Content-MD5", md5 );
         }
         if ( minor != null ) {
