@@ -494,9 +494,27 @@ public class UpdateServletLogic {
         }
 
         //And finally create and return the build file
-        String path = WorkingCache.getPathFromCache( fileIdentifier.getURI(), fileIdentifier.getHostId() );
-        String assetPath = Config.getStringProperty( "ASSET_PATH" );
-        File buildFile = new File( Config.CONTEXT.getRealPath( assetPath + path ) );
+        String filePath = WorkingCache.getPathFromCache( fileIdentifier.getURI(), fileIdentifier.getHostId() );
+
+        //Verify if there is set the ASSET_REAL_PATH
+        String assetsRealPath = Config.getStringProperty( "ASSET_REAL_PATH" );
+        String assetsPath = Config.getStringProperty( "ASSET_PATH" );
+
+        if ( assetsRealPath != null && !assetsRealPath.isEmpty() ) {
+
+            if ( assetsRealPath.endsWith( File.separator ) && filePath.startsWith( File.separator ) ) {
+                filePath = filePath.replaceFirst( File.separator, "" );
+            }
+            filePath = assetsRealPath + filePath;
+        } else {
+
+            if ( assetsPath.endsWith( File.separator ) && filePath.startsWith( File.separator ) ) {
+                filePath = filePath.replaceFirst( File.separator, "" );
+            }
+            filePath = Config.CONTEXT.getRealPath( assetsPath + filePath );
+        }
+
+        File buildFile = new File( filePath );
 
         retCode = 200;
         return buildFile;
