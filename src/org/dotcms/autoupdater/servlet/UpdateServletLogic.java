@@ -448,6 +448,8 @@ public class UpdateServletLogic {
             return null;
         }
 
+        Boolean forAutoupdater = false;
+
         //Verify if there is a file to provide
         String contFile = buildContentlet.getStringProperty( config.getFilesFileFieldName() );
         if ( !UtilMethods.isSet( contFile ) ) {
@@ -461,9 +463,11 @@ public class UpdateServletLogic {
 
         if ( currentVersion.startsWith( AUTO_UPDATER_PREFIX ) ) {
             currentVersion = currentVersion.replaceAll( AUTO_UPDATER_PREFIX, "" );
+            forAutoupdater = true;
         }
         if ( minorVersion.startsWith( AUTO_UPDATER_PREFIX ) ) {
             minorVersion = minorVersion.replaceAll( AUTO_UPDATER_PREFIX, "" );
+            forAutoupdater = true;
         }
 
         //Verify if there is new content or not to provide
@@ -486,6 +490,21 @@ public class UpdateServletLogic {
             } else {
 
                 Logger.info( this.getClass(), "Current version " + currentVersion + " got version " + minorVersion + ", No newer version available" );
+
+                // No content, no newer version
+                retCode = 204;
+                return null;
+            }
+        } else if ( forAutoupdater ) {
+
+            /*
+            Lets make sure we are not returning multiple times the same version of the autoupdater
+             */
+            long fileBuild = Long.parseLong( buildContentlet.getStringProperty( "buildNumber" ) );
+            long currentBuild = Long.parseLong( build );
+            if ( !(fileBuild > currentBuild) ) {
+
+                Logger.info( this.getClass(), "Current version " + currentVersion + " Build " + build + " got version " + minorVersion + " Build " + buildContentlet.getStringProperty( "buildNumber" ) + " , No newer version available for the Autoupdater." );
 
                 // No content, no newer version
                 retCode = 204;
