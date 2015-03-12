@@ -122,5 +122,8 @@ Export-Package: org.apache.commons.fileupload,
  com.dotmarketing.beans,
  com.dotmarketing.beans,
  org.apache.commons.io,
- org.apache.lucene.queryParser
+ org.apache.lucene.queryParser,
+ javax.mail.internet.InternetAddress,
+ javax.mail.internet
+
 
