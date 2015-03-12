@@ -118,5 +118,9 @@ Export-Package: org.apache.commons.fileupload,
  com.thoughtworks.xstream.io.xml,
  javax.ws.rs,
  javax.ws.rs.core,
- org.codehaus.jettison.json
+ org.codehaus.jettison.json,
+ com.dotmarketing.beans,
+ com.dotmarketing.beans,
+ org.apache.commons.io,
+ org.apache.lucene.queryParser
 
