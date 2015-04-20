@@ -73,7 +73,7 @@ public class UpdateUploadServlet extends BaseUpdateServlet {
 		  Logger.info(UpdateUploadServlet.class, "Getting credentials");
 		  User auth=getCredentials(request, response);
 		  if (auth!=null) {
-			  UpdateServletLogicConfig config=new UpdateServletLogicConfig(false);
+			  UpdateServletLogicConfig config=new UpdateServletLogicConfig(false, false);
 			  UpdateServletLogic l=new UpdateServletLogic(config);
 			  try{
 			   Logger.info(UpdateUploadServlet.class, "Checking for write permissions for user "+auth.getUserId());	  

@@ -111,7 +111,7 @@ public abstract class BaseUpdateServlet extends HttpServlet {
 
         boolean success = false;
         if ( buildFile == null ) {
-            Logger.info( UpdateServlet.class, "Could not find autoupdater file for version = " + version + " and build " + build );
+            Logger.info( this, "Could not find autoupdater file for version = " + version + " and build " + build );
             response.sendError( logic.getRetCode() );
         } else {
             serveHeaders( response, null, md5, newMinor, prettyName );
@@ -182,7 +182,7 @@ public abstract class BaseUpdateServlet extends HttpServlet {
         if ( downloadLink != null ) {
             response.setHeader( "Download-Link", downloadLink );
         }
-        if ( md5 != null ) {
+        if ( md5 != null && !md5.isEmpty() ) {
             response.setHeader( "Content-MD5", md5 );
         }
         if ( minor != null ) {

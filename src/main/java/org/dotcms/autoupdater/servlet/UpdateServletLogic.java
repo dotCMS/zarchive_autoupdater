@@ -110,7 +110,7 @@ public class UpdateServletLogic {
                 query += " +" + config.getFilesStructure() + "." + config.getReleasedField() + ":true";
             }
 
-            List<Contentlet> versionList = cAPI.search( query, 1, 0, config.getFilesStructure() + "." + config.getBuildNumberField() + " desc", sysUser, false );
+            List<Contentlet> versionList = cAPI.search(query, 1, 0, config.getFilesStructure() + "." + config.getBuildNumberField() + " desc", sysUser, false);
             if ( !versionList.isEmpty() ) {
 
                 Contentlet minorVersionContentlet = versionList.get( 0 );
@@ -145,7 +145,7 @@ public class UpdateServletLogic {
             String query;
 
             //Look for the major version greater than the major version of this current version
-            Contentlet majorVersion = getMajorVersion( version, allowTestingBuilds );
+            Contentlet majorVersion = getMajorVersion(version, allowTestingBuilds);
 
             if ( majorVersion != null ) {
 
@@ -170,11 +170,11 @@ public class UpdateServletLogic {
             }
 
         } catch ( DotDataException e ) {
-            Logger.debug( UpdateServletLogic.class, "DotDataException: " + e.getMessage(), e );
+            Logger.debug(UpdateServletLogic.class, "DotDataException: " + e.getMessage(), e);
         } catch ( DotSecurityException e ) {
-            Logger.debug( UpdateServletLogic.class, "DotSecurityException: " + e.getMessage(), e );
+            Logger.debug(UpdateServletLogic.class, "DotSecurityException: " + e.getMessage(), e);
         } catch ( ParseException e ) {
-            Logger.debug( UpdateServletLogic.class, "ParseException: " + e.getMessage(), e );
+            Logger.debug(UpdateServletLogic.class, "ParseException: " + e.getMessage(), e);
         }
 
         Logger.debug( this.getClass(), "returning from getContentlets" );
@@ -290,6 +290,10 @@ public class UpdateServletLogic {
             if ( !config.is2XBuild() ) {
                 query += " -" + config.getVersionStructure() + "." + config.getVersionMajorField() + ":2.*";
             }
+            if ( !config.is3XBuild() ) {
+                query += " -" + config.getVersionStructure() + "." + config.getVersionMajorField() + ":3.*";
+            }
+
             //Now lets search for all the mayor versions except the current one, and lets compare one by one which one is mayor
             versionList = cAPI.search( query, 0, 0, config.getVersionStructure() + "." + config.getVersionMajorField() + " desc", sysUser, false );
 
@@ -445,6 +449,8 @@ public class UpdateServletLogic {
             return null;
         }
 
+        Boolean forAutoupdater = false;
+
         //Verify if there is a file to provide
         String contFile = buildContentlet.getStringProperty( config.getFilesFileFieldName() );
         if ( !UtilMethods.isSet( contFile ) ) {
@@ -458,9 +464,11 @@ public class UpdateServletLogic {
 
         if ( currentVersion.startsWith( AUTO_UPDATER_PREFIX ) ) {
             currentVersion = currentVersion.replaceAll( AUTO_UPDATER_PREFIX, "" );
+            forAutoupdater = true;
         }
         if ( minorVersion.startsWith( AUTO_UPDATER_PREFIX ) ) {
             minorVersion = minorVersion.replaceAll( AUTO_UPDATER_PREFIX, "" );
+            forAutoupdater = true;
         }
 
         //Verify if there is new content or not to provide
@@ -480,6 +488,21 @@ public class UpdateServletLogic {
                     retCode = 204;
                     return null;
                 }
+            } else if ( forAutoupdater ) {
+                /*
+                Lets make sure we are not returning multiple times the same version of the autoupdater
+                 */
+                long fileBuild = Long.parseLong(buildContentlet.getStringProperty("buildNumber"));
+                long currentBuild = Long.parseLong(build);
+                if (!(fileBuild > currentBuild)) {
+
+                Logger.info(this.getClass(), "Current version " + currentVersion + " Build " + build + " got version " + minorVersion + " Build " + buildContentlet.getStringProperty("buildNumber") + " , No newer version available for the Autoupdater.");
+
+                                // No content, no newer version
+                retCode = 204;
+                return null;
+
+                }
             } else {
 
                 Logger.info( this.getClass(), "Current version " + currentVersion + " got version " + minorVersion + ", No newer version available" );
@@ -491,9 +514,27 @@ public class UpdateServletLogic {
         }
 
         //And finally create and return the build file
-        String path = WorkingCache.getPathFromCache( fileIdentifier.getURI(), fileIdentifier.getHostId() );
-        String assetPath = Config.getStringProperty( "ASSET_PATH" );
-        File buildFile = new File( Config.CONTEXT.getRealPath( assetPath + path ) );
+        String filePath = WorkingCache.getPathFromCache( fileIdentifier.getURI(), fileIdentifier.getHostId() );
+
+        //Verify if there is set the ASSET_REAL_PATH
+        String assetsRealPath = Config.getStringProperty( "ASSET_REAL_PATH" );
+        String assetsPath = Config.getStringProperty( "ASSET_PATH" );
+
+        if ( assetsRealPath != null && !assetsRealPath.isEmpty() ) {
+
+            if ( assetsRealPath.endsWith( File.separator ) && filePath.startsWith( File.separator ) ) {
+                filePath = filePath.replaceFirst( File.separator, "" );
+            }
+            filePath = assetsRealPath + filePath;
+        } else {
+
+            if ( assetsPath.endsWith( File.separator ) && filePath.startsWith( File.separator ) ) {
+                filePath = filePath.replaceFirst( File.separator, "" );
+            }
+            filePath = Config.CONTEXT.getRealPath( assetsPath + filePath );
+        }
+
+        File buildFile = new File( filePath );
 
         retCode = 200;
         return buildFile;
