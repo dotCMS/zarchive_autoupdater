@@ -4,7 +4,7 @@ import com.dotmarketing.filters.CMSFilter;
 import com.dotmarketing.osgi.GenericBundleActivator;
 import com.dotcms.repackage.org.apache.felix.http.api.ExtHttpService;
 import org.dotcms.autoupdater.servlet.UpdateServlet;
-import org.dotcms.autoupdater.servlet.UpdateServlet2x;
+import org.dotcms.autoupdater.servlet.UpdateServlet1x;
 import org.dotcms.autoupdater.servlet.UpdateUploadServlet;
 import com.dotcms.repackage.org.osgi.framework.BundleContext;
 import com.dotcms.repackage.org.osgi.framework.ServiceReference;
@@ -18,6 +18,7 @@ public class Activator extends GenericBundleActivator {
 
     public static final String MAPPING_UPGRADE = "/servlets/upgrade";
     public static final String MAPPING_UPGRADE_2X = "/servlets/upgrade2x";
+    public static final String MAPPING_UPGRADE_3X = "/servlets/upgrade3x";
     public static final String MAPPING_UPGRADE_UPLOAD = "/servlets/upgradeUpload";
 
     @Override
@@ -34,9 +35,9 @@ public class Activator extends GenericBundleActivator {
             ExtHttpService service = (ExtHttpService) context.getService( sRef );
             try {
                 //Registering servlets
-                service.registerServlet( MAPPING_UPGRADE, new UpdateServlet(), null, null );
-                service.registerServlet( MAPPING_UPGRADE_2X, new UpdateServlet2x(), null, null );
-                service.registerServlet( MAPPING_UPGRADE_UPLOAD, new UpdateUploadServlet(), null, null );
+                service.registerServlet( MAPPING_UPGRADE, new UpdateServlet1x(), null, null );
+                service.registerServlet( MAPPING_UPGRADE_2X, new UpdateServlet(), null, null );
+                service.registerServlet( MAPPING_UPGRADE_3X, new UpdateServlet(), null, null );
             } catch ( Exception e ) {
                 e.printStackTrace();
             }
@@ -45,11 +46,13 @@ public class Activator extends GenericBundleActivator {
         //Exclude some urls
         CMSFilter.addExclude( "/app" + MAPPING_UPGRADE );
         CMSFilter.addExclude( "/app" + MAPPING_UPGRADE_2X );
+        CMSFilter.addExclude( "/app" + MAPPING_UPGRADE_3X );
         CMSFilter.addExclude( "/app" + MAPPING_UPGRADE_UPLOAD );
 
         //Add some url Rewrite rules
         addRule( "oldAutoUpdaterRule2X", "^" + MAPPING_UPGRADE_2X + "$", "/app" + MAPPING_UPGRADE_2X );
         addRule( "oldAutoUpdaterRule", "^" + MAPPING_UPGRADE + "$", "/app" + MAPPING_UPGRADE );
+        addRule( "oldAutoUpdaterRule3X", "^" + MAPPING_UPGRADE_3X + "$", "/app" + MAPPING_UPGRADE_3X );
         addRule( "oldAutoUpdaterRuleUpload", "^" + MAPPING_UPGRADE_UPLOAD + "$", "/app" + MAPPING_UPGRADE_UPLOAD );
     }
 
