@@ -38,6 +38,7 @@ public class Activator extends GenericBundleActivator {
                 service.registerServlet( MAPPING_UPGRADE, new UpdateServlet1x(), null, null );
                 service.registerServlet( MAPPING_UPGRADE_2X, new UpdateServlet(), null, null );
                 service.registerServlet( MAPPING_UPGRADE_3X, new UpdateServlet(), null, null );
+                service.registerServlet( MAPPING_UPGRADE_UPLOAD, new UpdateUploadServlet(), null, null );
             } catch ( Exception e ) {
                 e.printStackTrace();
             }
@@ -51,8 +52,8 @@ public class Activator extends GenericBundleActivator {
 
         //Add some url Rewrite rules
         addRule( "oldAutoUpdaterRule2X", "^" + MAPPING_UPGRADE_2X + "$", "/app" + MAPPING_UPGRADE_2X );
-        addRule( "oldAutoUpdaterRule", "^" + MAPPING_UPGRADE + "$", "/app" + MAPPING_UPGRADE );
         addRule( "oldAutoUpdaterRule3X", "^" + MAPPING_UPGRADE_3X + "$", "/app" + MAPPING_UPGRADE_3X );
+        addRule( "oldAutoUpdaterRule", "^" + MAPPING_UPGRADE + "$", "/app" + MAPPING_UPGRADE );
         addRule( "oldAutoUpdaterRuleUpload", "^" + MAPPING_UPGRADE_UPLOAD + "$", "/app" + MAPPING_UPGRADE_UPLOAD );
     }
 
