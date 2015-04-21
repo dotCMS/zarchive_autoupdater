@@ -43,10 +43,10 @@ public class UpdateServlet extends BaseUpdateServlet {
 
         //Let see if this is a 3.x or 2.x requests
         if ( version.startsWith( "3" ) ) {//A 3.x request
-            config.setIs3XBuild(true);
+            config.setIs3XBuild( true );
             config.setIs2XBuild( false );
         } else {//A 2.x request
-            config.setIs3XBuild(false);
+            config.setIs3XBuild( false );
             config.setIs2XBuild( true );
         }
 
@@ -67,7 +67,7 @@ public class UpdateServlet extends BaseUpdateServlet {
             serveAgentFile( response, version, agentVersion, allowTestingBuilds );
         } else {
             //Serve a build file for a major, minor and build version
-            provideUpdateInfo(response, version, forSpecificMinorVersion, build, allowTestingBuilds);
+            provideUpdateInfo( response, version, forSpecificMinorVersion, build, allowTestingBuilds );
         }
     }
 
@@ -120,7 +120,7 @@ public class UpdateServlet extends BaseUpdateServlet {
         }
 
         //For a given build contentlet this method will verify for a download update file link and if everything is ok with it will return it
-        String buildDownloadLink = logic.processAndVerifyDownloadLink( list, version, build );
+        String buildDownloadLink = logic.processAndVerifyDownloadLink(list, version, build );
         Contentlet buildContentlet = null;
         if ( list != null && list.size() > 0 ) {
             buildContentlet = list.get( 0 );
