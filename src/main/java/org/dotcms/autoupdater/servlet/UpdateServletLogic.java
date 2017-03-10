@@ -4,7 +4,7 @@ import com.dotmarketing.beans.Identifier;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.DotStateException;
 import com.dotmarketing.business.PermissionAPI;
-import com.dotmarketing.cache.StructureCache;
+import com.dotmarketing.cache.ContentTypeCacheImpl;
 import com.dotmarketing.cache.WorkingCache;
 import com.dotmarketing.common.db.DotConnect;
 import com.dotmarketing.db.HibernateUtil;
@@ -21,9 +21,9 @@ import com.dotmarketing.util.Config;
 import com.dotmarketing.util.Logger;
 import com.dotmarketing.util.UtilMethods;
 import com.liferay.portal.model.User;
-import org.apache.lucene.queryParser.ParseException;
+
 import org.dotcms.autoupdater.servlet.UpdateUploadServlet.UpdateData;
-import org.xbill.DNS.*;
+import com.dotcms.repackage.org.xbill.DNS.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -173,7 +173,7 @@ public class UpdateServletLogic {
             Logger.debug( UpdateServletLogic.class, "DotDataException: " + e.getMessage(), e );
         } catch ( DotSecurityException e ) {
             Logger.debug( UpdateServletLogic.class, "DotSecurityException: " + e.getMessage(), e );
-        } catch ( ParseException e ) {
+        } catch ( Exception e ) {
             Logger.debug( UpdateServletLogic.class, "ParseException: " + e.getMessage(), e );
         }
 
@@ -251,7 +251,7 @@ public class UpdateServletLogic {
      * @throws com.dotmarketing.exception.DotSecurityException
      * @throws org.apache.lucene.queryParser.ParseException
      */
-    private Contentlet getMajorVersion ( String version, boolean allowTestingBuilds ) throws DotDataException, DotSecurityException, ParseException {
+    private Contentlet getMajorVersion ( String version, boolean allowTestingBuilds ) throws DotDataException, DotSecurityException {
 
         Logger.info( this.getClass(), "Looking for Major version of minor = " + version );
 
@@ -560,7 +560,7 @@ public class UpdateServletLogic {
         if ( c == null || !UtilMethods.isSet( c.getIdentifier() ) ) {
             isNewContent = true;
             c = new Contentlet();
-            c.setStructureInode( StructureCache.getStructureByVelocityVarName( config.getFilesStructure() ).getInode() );
+            c.setStructureInode( new ContentTypeCacheImpl().getStructureByVelocityVarName( config.getFilesStructure() ).getInode() );
             c.setStringProperty( config.getFilesMinorFieldName(), data.getVersion() );
             c.setProperty( config.getBuildNumberField(), data.getBuild() );
             c.setBoolProperty( config.getReleasedField(), false );
@@ -590,82 +590,6 @@ public class UpdateServletLogic {
 
             Folder folder = APILocator.getFolderAPI().findFolderByPath( config.getUpgradeFileHome() + data.getMajor() + "/", APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ).getIdentifier(), user, true );
 
-            if ( folder != null && UtilMethods.isSet( folder.getInode() ) ) {
-
-                com.dotmarketing.portlets.files.model.File file = new com.dotmarketing.portlets.files.model.File();
-                String name = data.getVersion() + "_" + data.getBuild();
-                if ( data.getMajor().startsWith( AUTO_UPDATER_PREFIX ) ) {
-                    name += ".jar";
-                } else {
-                    name += ".zip";
-                }
-                Logger.info( this.getClass(), "Upload file name: " + name );
-                file.setTitle( name );
-                file.setFriendlyName( name );
-                file.setPublishDate( new Date() );
-                // find if file exists.
-
-                Logger.info( this.getClass(), "Checking if file already exists" );
-                com.dotmarketing.portlets.files.model.File oldFile = APILocator.getFileAPI().getFileByURI( config.getUpgradeFileHome() + data.getMajor() + "/" + name, APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ), false, user, true );
-                if ( oldFile == null || !UtilMethods.isSet( oldFile.getInode() ) ) {
-                    oldFile = APILocator.getFileAPI().getFileByURI( config.getUpgradeFileHome() + data.getMajor() + "/" + name, APILocator.getHostAPI().findDefaultHost( APILocator.getUserAPI().getSystemUser(), false ), false, user, true );
-                }
-
-                if ( oldFile != null && UtilMethods.isSet( oldFile.getIdentifier() ) && !isNewContent ) {
-                    Logger.info( this.getClass(), "File & content already exist. " );
-                    return false;
-                }
-                // persists the file
-                if ( data.getFile() != null ) {
-                    Logger.info( this.getClass(), "About to save file & content " );
-                    if ( oldFile != null && UtilMethods.isSet( oldFile.getIdentifier() ) ) {
-                        Logger.info( this.getClass(), "File already exists, associating previous file with content " );
-                        MessageDigest md = getMD5( data.getFile() );
-                        byte[] md5sum = md.digest();
-                        BigInteger bigInt = new BigInteger( 1, md5sum );
-                        String output = bigInt.toString( 16 );
-                        c.setStringProperty( config.getFilesMD5FieldName(), output );
-                        c.setStringProperty( config.getFilesFileFieldName(), oldFile.getIdentifier() );
-                    } else {
-                        file.setSize( ((Long) data.getFile().length()).intValue() );
-                        file.setMimeType( "application/zip" );
-                        file.setFileName( name );
-                        file.setModUser( user.getUserId() );
-                        Logger.info( this.getClass(), "Saving file inode " + file.getFileName() );
-                        HibernateUtil.saveOrUpdate( file );
-                        // get the file Identifier
-                        Identifier ident = null;
-                        ident = new Identifier();
-                        // Saving the file, this creates the new version and save the new data
-                        com.dotmarketing.portlets.files.model.File workingFile = null;
-                        MessageDigest md = getMD5( data.getFile() );
-                        byte[] md5sum = md.digest();
-                        BigInteger bigInt = new BigInteger( 1, md5sum );
-                        String output = bigInt.toString( 16 );
-                        c.setStringProperty( config.getFilesMD5FieldName(), output );
-
-                        Logger.info( this.getClass(), "Saving working file " + file.getFileName() );
-                        workingFile = APILocator.getFileAPI().saveFile( file, data.getFile(), folder, user, true );
-
-                        Logger.info( this.getClass(), "Publishing file " + file.getFileName() );
-                        PublishFactory.publishAsset( workingFile, user, false );
-                        c.setStringProperty( config.getFilesFileFieldName(), workingFile.getIdentifier() );
-                    }
-
-                    c.setLanguageId( APILocator.getLanguageAPI().getDefaultLanguage().getId() );
-                    Logger.info( this.getClass(), "Checking in contentlet" );
-                    if ( isNewContent ) {
-                        c = cAPI.checkin( c, relations, user, false );
-                    } else {
-                        c = cAPI.checkin( c, user, false );
-                    }
-                    cAPI.publish( c, user, true );
-                    Logger.info( this.getClass(), "File and content checked in." );
-                    return true;
-                }
-            } else {
-                Logger.error( this.getClass(), "Could not find folder " + config.getUpgradeFileHome() + data.getMajor() + "/" );
-            }
 
         } else {
             Logger.error( this.getClass(), "Could not find major version contentlet for " + data.getMajor() );

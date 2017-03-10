@@ -8,7 +8,7 @@ import org.dotcms.autoupdater.servlet.UpdateServlet;
 import org.dotcms.autoupdater.servlet.UpdateUploadServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.tuckey.web.filters.urlrewrite.NormalRule;
+import com.dotcms.repackage.org.tuckey.web.filters.urlrewrite.NormalRule;
 
 /**
  * Created by Jonathan Gamba
